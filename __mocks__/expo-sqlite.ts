@@ -14,6 +14,7 @@ type SQLiteDatabase = {
   getFirstAsync<T>(source: string, params?: any[]): Promise<T | null>;
   getAllAsync<T>(source: string, params?: any[]): Promise<T[]>;
   closeAsync(): Promise<void>;
+  withTransactionAsync(task: () => Promise<void>): Promise<void>;
 };
 
 const databases = new Map<string, Database.Database>();
@@ -23,12 +24,12 @@ export async function openDatabaseAsync(
 ): Promise<SQLiteDatabase> {
   let db: Database.Database;
 
-  // Use in-memory database for ':memory:' or create/open file database
-  if (databaseName === ':memory:') {
-    db = new Database(':memory:');
-  } else {
-    // For tests, use in-memory databases by default
-    db = databases.get(databaseName) || new Database(':memory:');
+  // Always use a fresh in-memory database for tests
+  // This ensures proper test isolation
+  db = new Database(':memory:');
+
+  // Store it if it has a name (for potential cleanup)
+  if (databaseName !== ':memory:') {
     databases.set(databaseName, db);
   }
 
@@ -59,6 +60,20 @@ export async function openDatabaseAsync(
 
     async closeAsync(): Promise<void> {
       db.close();
+    },
+
+    async withTransactionAsync(task: () => Promise<void>): Promise<void> {
+      // Begin transaction
+      db.exec('BEGIN TRANSACTION');
+      try {
+        await task();
+        // Commit transaction
+        db.exec('COMMIT');
+      } catch (error) {
+        // Rollback on error
+        db.exec('ROLLBACK');
+        throw error;
+      }
     },
   };
 }
