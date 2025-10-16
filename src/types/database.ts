@@ -308,19 +308,19 @@ export interface SyncMetadata {
 // =============================================================================
 
 /**
+ * Career entry with club details
+ * (Result of joining player_careers + clubs)
+ */
+export interface CareerWithClub extends PlayerCareer {
+  club: Club;
+}
+
+/**
  * Player with their career history
  * (Result of joining players + player_careers + clubs)
  */
 export interface PlayerWithCareer extends Player {
-  careers: Array<{
-    career_id: number;
-    club_id: number;
-    club_name: string;
-    club_badge_url: string | null;
-    start_year: number;
-    end_year: number | null;
-    display_order: number;
-  }>;
+  careers: CareerWithClub[];
 }
 
 /**
@@ -328,11 +328,9 @@ export interface PlayerWithCareer extends Player {
  * (Result of joining transfers + players + clubs)
  */
 export interface TransferWithDetails extends Transfer {
-  player_name: string;
-  from_club_name: string;
-  to_club_name: string;
-  from_club_badge_url: string | null;
-  to_club_badge_url: string | null;
+  player: Player;
+  fromClub: Club;
+  toClub: Club;
 }
 
 /**
