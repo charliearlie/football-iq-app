@@ -42,6 +42,11 @@ export function isGameOver(
  * Calculates what the player would earn if they guess correctly now,
  * given the current game state (clubs revealed, hints shown, wrong guesses).
  *
+ * CURRENT SCORING:
+ * - Career Path Progressive: Always 1 point
+ * - Career Path Full: Always 1 point
+ * - Transfer: 3 points (no hints) → 2 points (one hint) → 1 point (both hints)
+ *
  * @param gameMode - The game mode being played
  * @param state - Current game state with relevant fields for the mode
  * @returns Potential score (points that would be earned)
@@ -52,7 +57,7 @@ export function isGameOver(
  *   clubsRevealed: 2,
  *   wrongGuesses: 1
  * })
- * // => 2 (3 base points - 1 penalty)
+ * // => 1 (simple scoring)
  *
  * @example
  * getPotentialScore('transfer', {
@@ -70,13 +75,8 @@ export function getPotentialScore(
   }
 ): number {
   if (gameMode === 'career_path_progressive') {
-    const { totalClubs = 0, clubsRevealed = 0, wrongGuesses = 0 } = state;
-    const scoreBreakdown = calculateCareerPathScore(
-      totalClubs,
-      clubsRevealed,
-      wrongGuesses
-    );
-    return scoreBreakdown.finalScore;
+    // Simple scoring: always 1 point for correct answer
+    return 1;
   }
 
   if (gameMode === 'career_path_full') {

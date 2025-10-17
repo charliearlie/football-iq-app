@@ -67,6 +67,45 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
 }
 
 /**
+ * Checks the database schema version and resets if needed
+ */
+async function checkDatabaseVersion(db: SQLite.SQLiteDatabase): Promise<boolean> {
+  try {
+    const result = await db.getFirstAsync<{ value: string }>(
+      'SELECT value FROM sync_metadata WHERE key = ?',
+      ['schema_version']
+    );
+
+    const storedVersion = result ? parseInt(result.value, 10) : 0;
+
+    if (storedVersion !== DATABASE_CONFIG.VERSION) {
+      console.log(
+        `Database version mismatch (stored: ${storedVersion}, expected: ${DATABASE_CONFIG.VERSION}). Resetting database...`
+      );
+      return true; // Needs reset
+    }
+
+    return false; // Version matches, no reset needed
+  } catch (error) {
+    // If sync_metadata table doesn't exist yet, this is a first run or old schema
+    console.log('Could not read schema version, will initialize fresh database');
+    return true; // Needs reset
+  }
+}
+
+/**
+ * Stores the current database schema version
+ */
+async function storeSchemaVersion(db: SQLite.SQLiteDatabase): Promise<void> {
+  const now = new Date().toISOString();
+  await db.runAsync(
+    `INSERT OR REPLACE INTO sync_metadata (key, value, updated_at) VALUES (?, ?, ?)`,
+    ['schema_version', DATABASE_CONFIG.VERSION.toString(), now]
+  );
+  console.log(`Schema version ${DATABASE_CONFIG.VERSION} stored in database`);
+}
+
+/**
  * Internal function to initialize the database connection
  */
 async function initializeDatabaseConnection(): Promise<SQLite.SQLiteDatabase> {
@@ -74,13 +113,32 @@ async function initializeDatabaseConnection(): Promise<SQLite.SQLiteDatabase> {
     console.log(`Opening database: ${DATABASE_CONFIG.NAME}`);
 
     // Open or create the database
-    const db = await SQLite.openDatabaseAsync(DATABASE_CONFIG.NAME);
+    let db = await SQLite.openDatabaseAsync(DATABASE_CONFIG.NAME);
+
+    // Check if database version matches
+    const needsReset = await checkDatabaseVersion(db);
+
+    if (needsReset) {
+      // Close current connection
+      await db.closeAsync();
+
+      // Delete old database
+      await SQLite.deleteDatabaseAsync(DATABASE_CONFIG.NAME);
+      console.log('Old database deleted');
+
+      // Reopen fresh database
+      db = await SQLite.openDatabaseAsync(DATABASE_CONFIG.NAME);
+      console.log('Fresh database created');
+    }
 
     // Store the instance
     databaseInstance = db;
 
     // Initialize the schema (idempotent)
     await initializeDatabase(db);
+
+    // Store the current schema version
+    await storeSchemaVersion(db);
 
     // Mark as initialized
     isInitialized = true;

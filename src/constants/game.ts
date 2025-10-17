@@ -15,14 +15,16 @@ export const GAME_CONSTANTS = {
 
   /** Scoring rules for Career Path Progressive mode */
   CAREER_PATH_POINTS: {
-    /** Points awarded when guessed in first 20% of clubs shown */
-    FIRST_20_PERCENT: 3,
-    /** Points awarded when guessed in first 50% of clubs shown */
-    FIRST_50_PERCENT: 2,
-    /** Points awarded when guessed after 50% of clubs shown */
-    AFTER_50_PERCENT: 1,
-    /** Minimum score for a correct answer (never goes below this) */
-    MINIMUM_SCORE: 1,
+    /** Points awarded for correct answer (simplified scoring) */
+    CORRECT: 1,
+    /** Points awarded for incorrect answer */
+    INCORRECT: 0,
+
+    // Future implementation constants (not currently used):
+    // FIRST_QUARTER: 3,    // First 25% of clubs
+    // SECOND_QUARTER: 2,   // 26-50% of clubs
+    // LAST_HALF: 1,        // 51-100% of clubs
+    // MINIMUM_SCORE: 1,    // Never goes below this
   },
 
   /** Scoring rules for Transfer mode based on hints revealed */

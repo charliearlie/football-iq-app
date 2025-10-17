@@ -26,8 +26,7 @@ import { GAME_CONSTANTS } from '@/src/constants/game';
 
 // Components
 import { GameHeader } from '@/src/components/game/GameHeader';
-import { ClubDisplay } from '@/src/components/game/ClubDisplay';
-import { ScoreCard } from '@/src/components/game/ScoreCard';
+import { CareerTable } from '@/src/components/game/CareerTable';
 import { ResultModal } from '@/src/components/game/ResultModal';
 import { Input } from '@/src/components/ui/Input';
 import { Button } from '@/src/components/ui/Button';
@@ -150,7 +149,11 @@ export default function CareerPathProgressiveScreen() {
         setFinalScore(0);
         setIsComplete(true);
         setShowResult(true);
+      } else if (currentClubIndex < player.careers.length - 1) {
+        // Auto-reveal next club after wrong guess
+        setCurrentClubIndex((prev) => prev + 1);
       }
+      // If already on last club, just stay there and let user keep guessing
     }
   };
 
@@ -200,70 +203,71 @@ export default function CareerPathProgressiveScreen() {
     );
   }
 
-  const currentCareer = player.careers[currentClubIndex];
   const isLastClub = currentClubIndex >= player.careers.length - 1;
 
   return (
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
     >
-      <ScrollView style={styles.scrollContainer}>
-        {/* Game Header */}
-        <GameHeader
-          currentItem={currentClubIndex + 1}
-          totalItems={player.careers.length}
-          wrongGuesses={wrongGuesses}
-          maxWrongGuesses={GAME_CONSTANTS.MAX_WRONG_GUESSES}
+      {/* Fixed Header */}
+      <GameHeader
+        wrongGuesses={wrongGuesses}
+        maxWrongGuesses={GAME_CONSTANTS.MAX_WRONG_GUESSES}
+        hideProgress={true}
+        potentialScore={potentialScore}
+        scoreLabel="Points"
+      />
+
+      {/* Scrollable Game Content */}
+      <ScrollView
+        style={styles.gameContent}
+        contentContainerStyle={styles.gameContentInner}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Text style={styles.instructionText}>
+          Who played for {currentClubIndex === 0 ? 'this club' : 'these clubs'}?
+        </Text>
+        <CareerTable
+          careers={player.careers}
+          revealedCount={currentClubIndex + 1}
+          maxHeight={300}
+          style={styles.careerTable}
         />
-
-        {/* Score Card */}
-        <View style={styles.content}>
-          <ScoreCard potentialScore={potentialScore} label="Potential Points" />
-
-          {/* Club Display */}
-          <Text style={styles.instructionText}>
-            Who played for this club?
-          </Text>
-          <ClubDisplay
-            club={currentCareer.club}
-            startYear={currentCareer.start_year}
-            endYear={currentCareer.end_year}
-          />
-
-          {/* Input */}
-          <Input
-            value={guess}
-            onChangeText={setGuess}
-            placeholder="Enter player name..."
-            onSubmitEditing={handleGuess}
-            accessibilityLabel="Player name guess input"
-            style={styles.input}
-          />
-
-          {/* Action Buttons */}
-          <View style={styles.buttonContainer}>
-            {!isLastClub && (
-              <Button
-                variant="ghost"
-                onPress={handleSkip}
-                accessibilityLabel="Skip to next club"
-                style={styles.skipButton}
-              >
-                Skip Club
-              </Button>
-            )}
-            <Button
-              onPress={handleGuess}
-              disabled={guess.trim() === ''}
-              accessibilityLabel="Submit guess"
-              style={styles.guessButton}
-            >
-              Guess
-            </Button>
-          </View>
-        </View>
       </ScrollView>
+
+      {/* Fixed Footer */}
+      <View style={styles.footer}>
+        <Input
+          value={guess}
+          onChangeText={setGuess}
+          placeholder="Enter player name..."
+          onSubmitEditing={handleGuess}
+          accessibilityLabel="Player name guess input"
+          style={styles.input}
+        />
+        <View style={styles.buttonContainer}>
+          {!isLastClub && (
+            <Button
+              variant="ghost"
+              onPress={handleSkip}
+              accessibilityLabel="Skip to next club"
+              style={styles.skipButton}
+            >
+              Skip Club
+            </Button>
+          )}
+          <Button
+            onPress={handleGuess}
+            disabled={guess.trim() === ''}
+            accessibilityLabel="Submit guess"
+            style={styles.guessButton}
+          >
+            Guess
+          </Button>
+        </View>
+      </View>
 
       {/* Result Modal */}
       <ResultModal
@@ -288,14 +292,55 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background.primary,
   },
 
-  scrollContainer: {
+  // Scrollable game content
+  gameContent: {
     flex: 1,
   },
 
-  content: {
+  gameContentInner: {
     padding: SPACING.md,
+    flexGrow: 1,
   },
 
+  // Game content
+  instructionText: {
+    ...TYPOGRAPHY.h3,
+    color: COLORS.text.primary,
+    textAlign: 'center',
+    marginBottom: SPACING.lg,
+  },
+
+  careerTable: {
+    marginBottom: SPACING.md,
+  },
+
+  // Fixed footer section
+  footer: {
+    padding: SPACING.sm,
+    backgroundColor: COLORS.background.primary,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border.default,
+  },
+
+  // Input and buttons
+  input: {
+    marginBottom: SPACING.xs,
+  },
+
+  buttonContainer: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+  },
+
+  skipButton: {
+    flex: 1,
+  },
+
+  guessButton: {
+    flex: 2,
+  },
+
+  // Loading and error states
   centerContainer: {
     flex: 1,
     backgroundColor: COLORS.background.primary,
@@ -324,30 +369,5 @@ const styles = StyleSheet.create({
 
   errorButton: {
     minWidth: 200,
-  },
-
-  instructionText: {
-    ...TYPOGRAPHY.h3,
-    color: COLORS.text.primary,
-    textAlign: 'center',
-    marginVertical: SPACING.lg,
-  },
-
-  input: {
-    marginVertical: SPACING.lg,
-  },
-
-  buttonContainer: {
-    flexDirection: 'row',
-    gap: SPACING.md,
-    marginTop: SPACING.md,
-  },
-
-  skipButton: {
-    flex: 1,
-  },
-
-  guessButton: {
-    flex: 2,
   },
 });

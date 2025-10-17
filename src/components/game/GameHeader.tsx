@@ -39,6 +39,12 @@ export interface GameHeaderProps {
 
   /** Hide progress bar (for Transfer mode) */
   hideProgress?: boolean;
+
+  /** Potential score to display inline */
+  potentialScore?: number;
+
+  /** Label for score (defaults to "Points") */
+  scoreLabel?: string;
 }
 
 export const GameHeader: React.FC<GameHeaderProps> = ({
@@ -47,6 +53,8 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
   wrongGuesses,
   maxWrongGuesses,
   hideProgress = false,
+  potentialScore,
+  scoreLabel = 'Points',
 }) => {
   const showProgress = !hideProgress && currentItem !== undefined && totalItems !== undefined;
 
@@ -78,14 +86,29 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
         </View>
       )}
 
-      <View style={styles.wrongGuessSection}>
+      <View style={styles.statsRow}>
         <Text
           style={[styles.wrongGuessText, { color: getWrongGuessColor() }]}
           accessible={true}
           accessibilityLabel={`${wrongGuesses} wrong guesses out of ${maxWrongGuesses} maximum`}
         >
-          ❌ Wrong Guesses: {wrongGuesses} / {maxWrongGuesses}
+          ❌ Wrong: {wrongGuesses}/{maxWrongGuesses}
         </Text>
+
+        {potentialScore !== undefined && (
+          <View style={styles.scoreContainer}>
+            <Text
+              style={styles.scoreValue}
+              accessible={true}
+              accessibilityLabel={`${potentialScore} ${potentialScore === 1 ? 'point' : scoreLabel.toLowerCase()} available`}
+            >
+              {potentialScore}
+            </Text>
+            <Text style={styles.scoreLabel}>
+              {potentialScore === 1 ? scoreLabel.replace(/s$/i, '') : scoreLabel}
+            </Text>
+          </View>
+        )}
       </View>
     </View>
   );
@@ -94,21 +117,41 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.md,
+    paddingVertical: SPACING.sm,
     backgroundColor: COLORS.background.surface,
   },
 
   progressSection: {
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.sm,
   },
 
-  wrongGuessSection: {
+  statsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
 
   wrongGuessText: {
     ...TYPOGRAPHY.bodySmall,
     fontWeight: '600',
+  },
+
+  scoreContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+  },
+
+  scoreValue: {
+    ...TYPOGRAPHY.h2,
+    color: COLORS.brand.primary,
+    fontWeight: '700',
+  },
+
+  scoreLabel: {
+    ...TYPOGRAPHY.caption,
+    color: COLORS.text.tertiary,
+    textTransform: 'uppercase',
   },
 });
 

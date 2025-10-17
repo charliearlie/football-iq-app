@@ -92,17 +92,17 @@ const styles = StyleSheet.create({
 
   yearContainer: {
     alignItems: 'center',
-    marginBottom: SPACING.lg,
+    marginBottom: SPACING.md,
   },
 
   yearLabel: {
-    ...TYPOGRAPHY.label,
+    ...TYPOGRAPHY.bodySmall,
     color: COLORS.text.tertiary,
     marginBottom: SPACING.xs,
   },
 
   year: {
-    ...TYPOGRAPHY.display,
+    ...TYPOGRAPHY.h2,
     color: COLORS.accent.blue,
   },
 

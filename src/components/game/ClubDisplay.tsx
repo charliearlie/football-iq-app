@@ -34,6 +34,15 @@ export interface ClubDisplayProps {
   /** Year player left the club (null if currently playing) */
   endYear: number | null;
 
+  /** Number of appearances (optional) */
+  appearances?: number | null;
+
+  /** Number of goals (optional) */
+  goals?: number | null;
+
+  /** Use compact layout (smaller, inline details) */
+  compact?: boolean;
+
   /** Show club badge/logo (future enhancement) */
   showBadge?: boolean;
 }
@@ -42,10 +51,35 @@ export const ClubDisplay: React.FC<ClubDisplayProps> = ({
   club,
   startYear,
   endYear,
+  appearances,
+  goals,
+  compact = false,
   showBadge = false,
 }) => {
-  const yearsRange = endYear ? `${startYear} - ${endYear}` : `${startYear} - Present`;
+  const yearsRange = endYear ? `${startYear}-${endYear}` : `${startYear}-Present`;
 
+  // Compact mode for Career Path Full
+  if (compact) {
+    let details = `${yearsRange} • ${club.league || club.country}`;
+
+    // Add stats if available
+    if (appearances !== null && appearances !== undefined && goals !== null && goals !== undefined) {
+      details += ` • ${appearances} apps, ${goals} goals`;
+    }
+
+    return (
+      <View style={styles.compactContainer}>
+        <Text style={styles.compactClubName} numberOfLines={1}>
+          {club.name}
+        </Text>
+        <Text style={styles.compactDetails} numberOfLines={1}>
+          {details}
+        </Text>
+      </View>
+    );
+  }
+
+  // Full mode for Career Path Progressive
   return (
     <Card
       accentColor={COLORS.brand.primary}
@@ -72,6 +106,18 @@ export const ClubDisplay: React.FC<ClubDisplayProps> = ({
             {club.country}
           </Text>
         </View>
+
+        {/* Stats (if available) */}
+        {(appearances !== null && appearances !== undefined || goals !== null && goals !== undefined) && (
+          <View style={styles.stats}>
+            {appearances !== null && appearances !== undefined && (
+              <Text style={styles.statText}>{appearances} apps</Text>
+            )}
+            {goals !== null && goals !== undefined && (
+              <Text style={styles.statText}>{goals} goals</Text>
+            )}
+          </View>
+        )}
       </View>
     </Card>
   );
@@ -111,6 +157,43 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.bodySmall,
     color: COLORS.text.tertiary,
     marginHorizontal: SPACING.sm,
+  },
+
+  stats: {
+    flexDirection: 'row',
+    gap: SPACING.md,
+    marginTop: SPACING.sm,
+    paddingTop: SPACING.sm,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border.default,
+  },
+
+  statText: {
+    ...TYPOGRAPHY.bodySmall,
+    color: COLORS.text.secondary,
+    fontWeight: '600',
+  },
+
+  // Compact mode styles
+  compactContainer: {
+    backgroundColor: COLORS.background.surface,
+    borderRadius: BORDER_RADIUS.md,
+    padding: SPACING.md,
+    borderLeftWidth: 3,
+    borderLeftColor: COLORS.gameModes.careerPathFull.primary,
+    marginBottom: SPACING.sm,
+  },
+
+  compactClubName: {
+    ...TYPOGRAPHY.bodyLarge,
+    fontWeight: '600',
+    color: COLORS.text.primary,
+    marginBottom: SPACING.xs,
+  },
+
+  compactDetails: {
+    ...TYPOGRAPHY.bodySmall,
+    color: COLORS.text.secondary,
   },
 });
 

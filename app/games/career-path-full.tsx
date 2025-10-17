@@ -14,7 +14,7 @@ import {
   View,
   Text,
   StyleSheet,
-  FlatList,
+  ScrollView,
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
@@ -24,7 +24,8 @@ import { COLORS, TYPOGRAPHY, SPACING } from '@/src/constants/theme';
 import { GAME_CONSTANTS } from '@/src/constants/game';
 
 // Components
-import { ClubDisplay } from '@/src/components/game/ClubDisplay';
+import { GameHeader } from '@/src/components/game/GameHeader';
+import { CareerTable } from '@/src/components/game/CareerTable';
 import { ResultModal } from '@/src/components/game/ResultModal';
 import { Input } from '@/src/components/ui/Input';
 import { Button } from '@/src/components/ui/Button';
@@ -43,7 +44,7 @@ import {
 } from '@/src/utils';
 
 // Types
-import type { Question, PlayerWithCareer, CareerWithClub } from '@/src/types/database';
+import type { Question, PlayerWithCareer } from '@/src/types/database';
 
 export default function CareerPathFullScreen() {
   const router = useRouter();
@@ -121,15 +122,6 @@ export default function CareerPathFullScreen() {
     loadQuestion();
   };
 
-  const renderCareerItem = ({ item }: { item: CareerWithClub }) => (
-    <View style={styles.careerItem}>
-      <ClubDisplay
-        club={item.club}
-        startYear={item.start_year}
-        endYear={item.end_year}
-      />
-    </View>
-  );
 
   // Loading state
   if (loading) {
@@ -167,47 +159,56 @@ export default function CareerPathFullScreen() {
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
     >
-      <View style={styles.container}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.instructionText}>
-            Who played for these clubs?
-          </Text>
-          <Text style={styles.hintText}>
-            ({player.careers.length} clubs total)
-          </Text>
-        </View>
+      {/* Fixed Header */}
+      <GameHeader
+        wrongGuesses={0}
+        maxWrongGuesses={1}
+        hideProgress={true}
+        potentialScore={1}
+        scoreLabel="Points"
+      />
 
-        {/* Clubs List */}
-        <FlatList
-          data={player.careers}
-          renderItem={renderCareerItem}
-          keyExtractor={(item) => item.id.toString()}
-          contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={true}
+      {/* Scrollable Game Content */}
+      <ScrollView
+        style={styles.gameContent}
+        contentContainerStyle={styles.gameContentInner}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Text style={styles.instructionText}>
+          Who played for these clubs?
+        </Text>
+        <Text style={styles.hintText}>
+          ({player.careers.length} clubs total)
+        </Text>
+        <CareerTable
+          careers={player.careers}
+          revealedCount={player.careers.length}
+          maxHeight={400}
+          style={styles.careerTable}
         />
+      </ScrollView>
 
-        {/* Input and Guess Button */}
-        <View style={styles.footer}>
-          <Input
-            value={guess}
-            onChangeText={setGuess}
-            placeholder="Enter player name..."
-            onSubmitEditing={handleGuess}
-            editable={!isComplete}
-            accessibilityLabel="Player name guess input"
-            style={styles.input}
-          />
-          <Button
-            onPress={handleGuess}
-            disabled={guess.trim() === '' || isComplete}
-            accessibilityLabel="Submit guess"
-            style={styles.guessButton}
-          >
-            {isComplete ? 'Answered' : 'Guess'}
-          </Button>
-        </View>
+      {/* Fixed Footer */}
+      <View style={styles.footer}>
+        <Input
+          value={guess}
+          onChangeText={setGuess}
+          placeholder="Enter player name..."
+          onSubmitEditing={handleGuess}
+          editable={!isComplete}
+          accessibilityLabel="Player name guess input"
+          style={styles.input}
+        />
+        <Button
+          onPress={handleGuess}
+          disabled={guess.trim() === '' || isComplete}
+          accessibilityLabel="Submit guess"
+          style={styles.guessButton}
+        >
+          {isComplete ? 'Answered' : 'Guess'}
+        </Button>
       </View>
 
       {/* Result Modal */}
@@ -233,6 +234,50 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background.primary,
   },
 
+  // Scrollable game content
+  gameContent: {
+    flex: 1,
+  },
+
+  gameContentInner: {
+    padding: SPACING.md,
+  },
+
+  instructionText: {
+    ...TYPOGRAPHY.h3,
+    color: COLORS.text.primary,
+    textAlign: 'center',
+    marginBottom: SPACING.xs,
+  },
+
+  hintText: {
+    ...TYPOGRAPHY.bodySmall,
+    color: COLORS.text.tertiary,
+    textAlign: 'center',
+    marginBottom: SPACING.lg,
+  },
+
+  careerTable: {
+    marginBottom: SPACING.md,
+  },
+
+  // Fixed footer section
+  footer: {
+    padding: SPACING.sm,
+    backgroundColor: COLORS.background.primary,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border.default,
+  },
+
+  input: {
+    marginBottom: SPACING.xs,
+  },
+
+  guessButton: {
+    width: '100%',
+  },
+
+  // Loading and error states
   centerContainer: {
     flex: 1,
     backgroundColor: COLORS.background.primary,
@@ -261,47 +306,5 @@ const styles = StyleSheet.create({
 
   errorButton: {
     minWidth: 200,
-  },
-
-  header: {
-    padding: SPACING.md,
-    alignItems: 'center',
-    backgroundColor: COLORS.background.surface,
-  },
-
-  instructionText: {
-    ...TYPOGRAPHY.h3,
-    color: COLORS.text.primary,
-    textAlign: 'center',
-    marginBottom: SPACING.xs,
-  },
-
-  hintText: {
-    ...TYPOGRAPHY.bodySmall,
-    color: COLORS.text.tertiary,
-    textAlign: 'center',
-  },
-
-  listContent: {
-    padding: SPACING.md,
-  },
-
-  careerItem: {
-    marginBottom: SPACING.md,
-  },
-
-  footer: {
-    padding: SPACING.md,
-    backgroundColor: COLORS.background.surface,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.border.default,
-  },
-
-  input: {
-    marginBottom: SPACING.md,
-  },
-
-  guessButton: {
-    width: '100%',
   },
 });

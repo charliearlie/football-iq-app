@@ -27,7 +27,6 @@ import { GAME_CONSTANTS } from '@/src/constants/game';
 // Components
 import { GameHeader } from '@/src/components/game/GameHeader';
 import { TransferDisplay } from '@/src/components/game/TransferDisplay';
-import { ScoreCard } from '@/src/components/game/ScoreCard';
 import { HintButton } from '@/src/components/game/HintButton';
 import { ResultModal } from '@/src/components/game/ResultModal';
 import { Input } from '@/src/components/ui/Input';
@@ -67,6 +66,7 @@ export default function TransferGameScreen() {
   const [showResult, setShowResult] = useState(false);
   const [finalScore, setFinalScore] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
 
   useEffect(() => {
     loadQuestion();
@@ -142,6 +142,15 @@ export default function TransferGameScreen() {
       setWrongGuesses(newWrongGuesses);
       setGuess('');
 
+      // Show feedback
+      const remainingAttempts = GAME_CONSTANTS.MAX_WRONG_GUESSES - newWrongGuesses;
+      setFeedbackMessage(
+        `Wrong! ${remainingAttempts} attempt${remainingAttempts !== 1 ? 's' : ''} remaining`
+      );
+
+      // Clear feedback after 2 seconds
+      setTimeout(() => setFeedbackMessage(null), 2000);
+
       // Check if game over
       if (newWrongGuesses >= GAME_CONSTANTS.MAX_WRONG_GUESSES) {
         // Game over
@@ -202,39 +211,42 @@ export default function TransferGameScreen() {
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
     >
-      <ScrollView style={styles.scrollContainer}>
-        {/* Game Header */}
-        <GameHeader
-          wrongGuesses={wrongGuesses}
-          maxWrongGuesses={GAME_CONSTANTS.MAX_WRONG_GUESSES}
-          hideProgress={true}
+      {/* Fixed Header */}
+      <GameHeader
+        wrongGuesses={wrongGuesses}
+        maxWrongGuesses={GAME_CONSTANTS.MAX_WRONG_GUESSES}
+        hideProgress={true}
+        potentialScore={potentialScore}
+        scoreLabel="Points"
+      />
+
+      {/* Scrollable Game Content */}
+      <ScrollView
+        style={styles.gameContent}
+        contentContainerStyle={styles.gameContentInner}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Text style={styles.instructionText}>
+          Who made this transfer?
+        </Text>
+        <TransferDisplay
+          fromClub={transfer.fromClub}
+          toClub={transfer.toClub}
+          year={transfer.transfer_year}
         />
 
-        {/* Score Card */}
-        <View style={styles.content}>
-          <ScoreCard potentialScore={potentialScore} label="Potential Points" />
-
-          {/* Transfer Display */}
-          <Text style={styles.instructionText}>
-            Who made this transfer?
-          </Text>
-          <TransferDisplay
-            fromClub={transfer.fromClub}
-            toClub={transfer.toClub}
-            year={transfer.transfer_year}
-          />
-
-          {/* Hints Section */}
-          <View style={styles.hintsSection}>
-            <Text style={styles.hintsTitle}>Hints</Text>
+        {/* Hints Section */}
+        <View style={styles.hintsSection}>
+          <Text style={styles.hintsTitle}>Hints</Text>
+          <View style={styles.hintsContainer}>
             <HintButton
               hintType="position"
               revealed={hintsRevealed.position}
               onReveal={() => handleRevealHint('position')}
               value={transfer.player.position || undefined}
             />
-            <View style={styles.hintSpacer} />
             <HintButton
               hintType="nationality"
               revealed={hintsRevealed.nationality}
@@ -242,28 +254,34 @@ export default function TransferGameScreen() {
               value={transfer.player.nationality || undefined}
             />
           </View>
-
-          {/* Input */}
-          <Input
-            value={guess}
-            onChangeText={setGuess}
-            placeholder="Enter player name..."
-            onSubmitEditing={handleGuess}
-            accessibilityLabel="Player name guess input"
-            style={styles.input}
-          />
-
-          {/* Guess Button */}
-          <Button
-            onPress={handleGuess}
-            disabled={guess.trim() === ''}
-            accessibilityLabel="Submit guess"
-            style={styles.guessButton}
-          >
-            Guess
-          </Button>
         </View>
       </ScrollView>
+
+      {/* Fixed Footer */}
+      <View style={styles.footer}>
+        <Input
+          value={guess}
+          onChangeText={setGuess}
+          placeholder="Enter player name..."
+          onSubmitEditing={handleGuess}
+          accessibilityLabel="Player name guess input"
+          style={styles.input}
+        />
+
+        {/* Feedback Message */}
+        {feedbackMessage && (
+          <Text style={styles.errorFeedback}>{feedbackMessage}</Text>
+        )}
+
+        <Button
+          onPress={handleGuess}
+          disabled={guess.trim() === ''}
+          accessibilityLabel="Submit guess"
+          style={styles.guessButton}
+        >
+          Guess
+        </Button>
+      </View>
 
       {/* Result Modal */}
       <ResultModal
@@ -294,14 +312,64 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background.primary,
   },
 
-  scrollContainer: {
+  // Scrollable game content
+  gameContent: {
     flex: 1,
   },
 
-  content: {
+  gameContentInner: {
     padding: SPACING.md,
   },
 
+  instructionText: {
+    ...TYPOGRAPHY.h3,
+    color: COLORS.text.primary,
+    textAlign: 'center',
+    marginBottom: SPACING.lg,
+  },
+
+  hintsSection: {
+    marginTop: SPACING.md,
+  },
+
+  hintsTitle: {
+    ...TYPOGRAPHY.bodySmall,
+    color: COLORS.text.tertiary,
+    marginBottom: SPACING.sm,
+    textAlign: 'center',
+  },
+
+  hintsContainer: {
+    flexDirection: 'row',
+    gap: SPACING.lg,
+    justifyContent: 'center',
+  },
+
+  // Fixed footer section
+  footer: {
+    padding: SPACING.sm,
+    backgroundColor: COLORS.background.primary,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border.default,
+  },
+
+  input: {
+    marginBottom: SPACING.xs,
+  },
+
+  errorFeedback: {
+    ...TYPOGRAPHY.bodySmall,
+    color: COLORS.semantic.error,
+    textAlign: 'center',
+    marginBottom: SPACING.sm,
+    fontWeight: '600',
+  },
+
+  guessButton: {
+    width: '100%',
+  },
+
+  // Loading and error states
   centerContainer: {
     flex: 1,
     backgroundColor: COLORS.background.primary,
@@ -330,34 +398,5 @@ const styles = StyleSheet.create({
 
   errorButton: {
     minWidth: 200,
-  },
-
-  instructionText: {
-    ...TYPOGRAPHY.h3,
-    color: COLORS.text.primary,
-    textAlign: 'center',
-    marginVertical: SPACING.lg,
-  },
-
-  hintsSection: {
-    marginVertical: SPACING.lg,
-  },
-
-  hintsTitle: {
-    ...TYPOGRAPHY.h4,
-    color: COLORS.text.secondary,
-    marginBottom: SPACING.md,
-  },
-
-  hintSpacer: {
-    height: SPACING.md,
-  },
-
-  input: {
-    marginVertical: SPACING.lg,
-  },
-
-  guessButton: {
-    width: '100%',
   },
 });

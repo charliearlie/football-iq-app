@@ -188,6 +188,8 @@ export async function seedDatabase(): Promise<void> {
           start_year: 2002,
           end_year: 2003,
           display_order: 1,
+          appearances: 31,
+          goals: 5,
         },
         {
           id: 2,
@@ -196,6 +198,8 @@ export async function seedDatabase(): Promise<void> {
           start_year: 2003,
           end_year: 2009,
           display_order: 2,
+          appearances: 292,
+          goals: 118,
         },
         {
           id: 3,
@@ -204,6 +208,8 @@ export async function seedDatabase(): Promise<void> {
           start_year: 2009,
           end_year: 2018,
           display_order: 3,
+          appearances: 438,
+          goals: 450,
         },
         {
           id: 4,
@@ -212,6 +218,8 @@ export async function seedDatabase(): Promise<void> {
           start_year: 2018,
           end_year: 2021,
           display_order: 4,
+          appearances: 134,
+          goals: 101,
         },
         {
           id: 5,
@@ -220,6 +228,8 @@ export async function seedDatabase(): Promise<void> {
           start_year: 2021,
           end_year: 2022,
           display_order: 5,
+          appearances: 54,
+          goals: 24,
         },
         {
           id: 6,
@@ -228,6 +238,8 @@ export async function seedDatabase(): Promise<void> {
           start_year: 2023,
           end_year: null,
           display_order: 6,
+          appearances: 75,
+          goals: 68,
         },
 
         // Lionel Messi (id: 2)
@@ -238,6 +250,8 @@ export async function seedDatabase(): Promise<void> {
           start_year: 2004,
           end_year: 2021,
           display_order: 1,
+          appearances: 778,
+          goals: 672,
         },
         {
           id: 8,
@@ -246,6 +260,8 @@ export async function seedDatabase(): Promise<void> {
           start_year: 2021,
           end_year: 2023,
           display_order: 2,
+          appearances: 75,
+          goals: 32,
         },
         {
           id: 9,
@@ -254,6 +270,8 @@ export async function seedDatabase(): Promise<void> {
           start_year: 2023,
           end_year: null,
           display_order: 3,
+          appearances: 40,
+          goals: 30,
         },
 
         // Zlatan Ibrahimovic (id: 3)
@@ -264,6 +282,8 @@ export async function seedDatabase(): Promise<void> {
           start_year: 2001,
           end_year: 2004,
           display_order: 1,
+          appearances: 110,
+          goals: 48,
         },
         {
           id: 11,
@@ -272,6 +292,8 @@ export async function seedDatabase(): Promise<void> {
           start_year: 2004,
           end_year: 2006,
           display_order: 2,
+          appearances: 92,
+          goals: 26,
         },
         {
           id: 12,
@@ -280,6 +302,8 @@ export async function seedDatabase(): Promise<void> {
           start_year: 2006,
           end_year: 2009,
           display_order: 3,
+          appearances: 117,
+          goals: 66,
         },
         {
           id: 13,
@@ -288,6 +312,8 @@ export async function seedDatabase(): Promise<void> {
           start_year: 2009,
           end_year: 2011,
           display_order: 4,
+          appearances: 46,
+          goals: 22,
         },
         {
           id: 14,
@@ -296,6 +322,8 @@ export async function seedDatabase(): Promise<void> {
           start_year: 2010,
           end_year: 2012,
           display_order: 5,
+          appearances: 85,
+          goals: 56,
         },
         {
           id: 15,
@@ -304,6 +332,8 @@ export async function seedDatabase(): Promise<void> {
           start_year: 2012,
           end_year: 2016,
           display_order: 6,
+          appearances: 180,
+          goals: 156,
         },
         {
           id: 16,
@@ -312,6 +342,8 @@ export async function seedDatabase(): Promise<void> {
           start_year: 2016,
           end_year: 2018,
           display_order: 7,
+          appearances: 53,
+          goals: 29,
         },
 
         // David Beckham (id: 4)
@@ -322,6 +354,8 @@ export async function seedDatabase(): Promise<void> {
           start_year: 1992,
           end_year: 2003,
           display_order: 1,
+          appearances: 394,
+          goals: 85,
         },
         {
           id: 18,
@@ -330,6 +364,8 @@ export async function seedDatabase(): Promise<void> {
           start_year: 2003,
           end_year: 2007,
           display_order: 2,
+          appearances: 159,
+          goals: 20,
         },
         {
           id: 19,
@@ -338,6 +374,8 @@ export async function seedDatabase(): Promise<void> {
           start_year: 2007,
           end_year: 2012,
           display_order: 3,
+          appearances: 124,
+          goals: 20,
         },
         {
           id: 20,
@@ -346,6 +384,8 @@ export async function seedDatabase(): Promise<void> {
           start_year: 2013,
           end_year: 2013,
           display_order: 4,
+          appearances: 14,
+          goals: 0,
         },
 
         // Thierry Henry (id: 5)
@@ -356,6 +396,8 @@ export async function seedDatabase(): Promise<void> {
           start_year: 1994,
           end_year: 1999,
           display_order: 1,
+          appearances: 141,
+          goals: 28,
         },
         {
           id: 22,
@@ -364,6 +406,8 @@ export async function seedDatabase(): Promise<void> {
           start_year: 1999,
           end_year: 1999,
           display_order: 2,
+          appearances: 20,
+          goals: 3,
         },
         {
           id: 23,
@@ -372,6 +416,8 @@ export async function seedDatabase(): Promise<void> {
           start_year: 1999,
           end_year: 2007,
           display_order: 3,
+          appearances: 377,
+          goals: 228,
         },
         {
           id: 24,
@@ -380,13 +426,15 @@ export async function seedDatabase(): Promise<void> {
           start_year: 2007,
           end_year: 2010,
           display_order: 4,
+          appearances: 121,
+          goals: 49,
         },
       ];
 
       for (const career of careers) {
         await db.runAsync(
-          `INSERT OR IGNORE INTO player_careers (id, player_id, club_id, start_year, end_year, display_order, server_updated_at, local_updated_at, is_synced)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)`,
+          `INSERT OR IGNORE INTO player_careers (id, player_id, club_id, start_year, end_year, display_order, appearances, goals, server_updated_at, local_updated_at, is_synced)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)`,
           [
             career.id,
             career.player_id,
@@ -394,6 +442,8 @@ export async function seedDatabase(): Promise<void> {
             career.start_year,
             career.end_year,
             career.display_order,
+            career.appearances,
+            career.goals,
             now,
             now,
           ]

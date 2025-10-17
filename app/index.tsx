@@ -14,6 +14,7 @@ import {
   ActivityIndicator,
   Pressable,
   PressableStateCallbackType,
+  ViewStyle,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS, getShadow } from '@/src/constants/theme';
@@ -27,6 +28,7 @@ interface GameModeCardProps {
   icon: string;
   accentColor: string;
   onPress: () => void;
+  style?: ViewStyle;
 }
 
 const GameModeCard: React.FC<GameModeCardProps> = ({
@@ -35,11 +37,13 @@ const GameModeCard: React.FC<GameModeCardProps> = ({
   icon,
   accentColor,
   onPress,
+  style,
 }) => {
   return (
     <Card
       onPress={onPress}
       accentColor={accentColor}
+      style={style}
       accessibilityLabel={`${title}. ${description}`}
       accessibilityHint="Double tap to start this game mode"
     >
@@ -130,15 +134,19 @@ export default function HomeScreen() {
           icon="🎯"
           accentColor={COLORS.gameModes.careerPath.primary}
           onPress={() => navigateToGame('/games/career-path-progressive')}
+          style={{ marginBottom: SPACING.md }}
         />
 
+        {/* Temporarily disabled - focusing on Progressive mode
         <GameModeCard
           title="Career Path Full"
           description="All clubs shown at once. One guess only!"
           icon="📋"
           accentColor={COLORS.gameModes.careerPathFull.primary}
           onPress={() => navigateToGame('/games/career-path-full')}
+          style={{ marginBottom: SPACING.md }}
         />
+        */}
 
         <GameModeCard
           title="Transfer Game"

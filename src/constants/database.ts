@@ -10,7 +10,7 @@ export const DATABASE_CONFIG = {
   NAME: 'football_trivia.db',
 
   /** Current database schema version */
-  VERSION: 1,
+  VERSION: 2,
 } as const;
 
 /**

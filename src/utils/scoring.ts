@@ -4,12 +4,27 @@
  * This module provides pure functions for calculating scores across different
  * game modes, managing accuracy rates, and tracking streaks.
  *
- * Key features:
- * - Career Path Progressive: Points decrease as more clubs are revealed
- * - Career Path Full: Simple correct/incorrect scoring
- * - Transfer: Points decrease as hints are revealed
+ * CURRENT IMPLEMENTATION:
+ * - Career Path Progressive: Simple 1 point for correct answer
+ * - Career Path Full: Simple 1 point for correct answer
+ * - Transfer: Points decrease as hints are revealed (3 → 2 → 1)
  * - Accuracy rate: Percentage of correct answers
  * - Streak tracking: Consecutive correct answers
+ *
+ * FUTURE DESIRED SCORING SYSTEM (Not Implemented):
+ * Career Path Progressive should reward based on how quickly the player guesses:
+ * - First 25% of clubs revealed: 3 points
+ * - Next 25% (26-50% total): 2 points
+ * - Last 50% (51-100%): 1 point
+ * - Penalties: -1 point per wrong guess (minimum 1 point if correct)
+ *
+ * Example for 8-club career:
+ * - Clubs 1-2 (≤25%): 3 points
+ * - Clubs 3-4 (≤50%): 2 points
+ * - Clubs 5-8 (>50%): 1 point
+ *
+ * This system needs careful implementation to ensure percentage calculations
+ * work correctly across all career lengths and provide clear feedback to users.
  */
 
 import { ScoreBreakdown } from '../types/game';
@@ -18,83 +33,26 @@ import { GAME_CONSTANTS } from '../constants/game';
 /**
  * Calculate score for Career Path Progressive mode
  *
- * Scoring rules:
- * - First 20% of clubs revealed: 3 base points
- * - First 50% of clubs revealed: 2 base points
- * - After 50% of clubs revealed: 1 base point
- * - Subtract 1 point per wrong guess
- * - Minimum score if correct: 1 point (never 0 or negative)
+ * TEMPORARY SIMPLE SCORING: Always 1 point for correct answer
  *
- * @param totalClubs - Total number of clubs in player's career
- * @param clubsRevealed - Number of clubs shown so far (1-indexed, e.g., 1 = first club)
- * @param wrongGuesses - Number of incorrect guesses made
- * @returns Score breakdown with base points, penalties, and final score
- *
- * @example
- * // Guessed after 2 of 10 clubs shown (20%), no wrong guesses
- * calculateCareerPathScore(10, 2, 0)
- * // => { basePoints: 3, penalties: 0, finalScore: 3, breakdown: "..." }
- *
- * @example
- * // Guessed after 5 of 10 clubs (50%), 1 wrong guess
- * calculateCareerPathScore(10, 5, 1)
- * // => { basePoints: 2, penalties: -1, finalScore: 1, breakdown: "..." }
+ * @param totalClubs - Total number of clubs in player's career (unused for now)
+ * @param clubsRevealed - Number of clubs shown so far (unused for now)
+ * @param wrongGuesses - Number of incorrect guesses made (unused for now)
+ * @returns Score breakdown with final score always 1
  */
 export function calculateCareerPathScore(
   totalClubs: number,
   clubsRevealed: number,
   wrongGuesses: number
 ): ScoreBreakdown {
-  // Calculate percentage of career revealed
-  const percentageRevealed = clubsRevealed / totalClubs;
-
-  // Determine base points based on percentage
-  // For 1 club careers, 100% is considered within first 20%
-  let basePoints: number;
-  if (totalClubs === 1 || percentageRevealed <= 0.2) {
-    basePoints = GAME_CONSTANTS.CAREER_PATH_POINTS.FIRST_20_PERCENT;
-  } else if (percentageRevealed <= 0.5) {
-    basePoints = GAME_CONSTANTS.CAREER_PATH_POINTS.FIRST_50_PERCENT;
-  } else {
-    basePoints = GAME_CONSTANTS.CAREER_PATH_POINTS.AFTER_50_PERCENT;
-  }
-
-  // Calculate penalties (ensure we return 0, not -0)
-  const penalties = wrongGuesses === 0 ? 0 : -wrongGuesses;
-
-  // Calculate raw score
-  const rawScore = basePoints + penalties;
-
-  // Enforce minimum score for correct answers
-  const finalScore = Math.max(
-    rawScore,
-    GAME_CONSTANTS.CAREER_PATH_POINTS.MINIMUM_SCORE
-  );
-
-  // Generate human-readable breakdown
-  const guessWord = wrongGuesses === 1 ? 'guess' : 'guesses';
-  const isMinimumEnforced = rawScore < GAME_CONSTANTS.CAREER_PATH_POINTS.MINIMUM_SCORE;
-
-  let breakdown: string;
-  if (wrongGuesses === 0) {
-    breakdown = `${basePoints} base points - 0 penalties = ${finalScore} ${
-      finalScore === 1 ? 'point' : 'points'
-    }`;
-  } else if (isMinimumEnforced) {
-    breakdown = `${basePoints} base points - ${wrongGuesses} wrong ${guessWord} = ${finalScore} ${
-      finalScore === 1 ? 'point' : 'points'
-    } (minimum enforced)`;
-  } else {
-    breakdown = `${basePoints} base points - ${wrongGuesses} wrong ${guessWord} = ${finalScore} ${
-      finalScore === 1 ? 'point' : 'points'
-    }`;
-  }
+  // Simple scoring: 1 point for correct answer
+  const finalScore = 1;
 
   return {
-    basePoints,
-    penalties,
+    basePoints: 1,
+    penalties: 0,
     finalScore,
-    breakdown,
+    breakdown: '1 point (correct)',
   };
 }
 

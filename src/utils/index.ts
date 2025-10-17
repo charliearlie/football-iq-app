@@ -30,3 +30,7 @@ export {
   formatTransferDisplay,
   getDifficultyColor,
 } from './gameState';
+
+// Display utilities
+export { getPositionAcronym, hasPositionAcronym } from './positionAcronyms';
+export { getCountryFlag, hasCountryFlag } from './countryFlags';

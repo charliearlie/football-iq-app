@@ -104,6 +104,8 @@ async function createTables(db: SQLite.SQLiteDatabase): Promise<void> {
       start_year INTEGER NOT NULL,
       end_year INTEGER,
       display_order INTEGER NOT NULL,
+      appearances INTEGER,
+      goals INTEGER,
       server_updated_at TEXT,
       local_updated_at TEXT,
       is_synced INTEGER DEFAULT 1,

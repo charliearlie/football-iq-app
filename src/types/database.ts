@@ -100,6 +100,12 @@ export interface PlayerCareer extends SyncableEntity {
    * Lower numbers come first
    */
   display_order: number;
+
+  /** Number of appearances for this club (null if not available) */
+  appearances: number | null;
+
+  /** Number of goals scored for this club (null if not available) */
+  goals: number | null;
 }
 
 /**
